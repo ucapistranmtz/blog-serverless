@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white text-black">
       <Navbar />
-      {/* 
+
       <main className="max-w-5xl mx-auto px-6 py-12">
         <section className="text-center mb-16">
           <h1 className="text-5xl font-extrabold mb-4 tracking-tight">
@@ -26,8 +26,8 @@ export default function Home() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {/* We will map our DynamoDB posts here later */}
-      {/* {[1, 2, 3].map((post) => (
+            {/* We will map our DynamoDB posts here later*/}
+            {[1, 2, 3].map((post) => (
               <article
                 key={post}
                 className="border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
@@ -45,9 +45,9 @@ export default function Home() {
                 </div>
               </article>
             ))}
-          </div> */}
-      {/* </section>  */}
-      {/* </main> */}
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
