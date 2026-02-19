@@ -1,19 +1,18 @@
 import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-
-const connectionString = process.env.POSTGRES_URL;
-
 export const auth = betterAuth({
-  database: new Pool({
-    connectionString,
-    ssl: {
-      rejectUnauthorized: false, // Común para Neon en entornos de desarrollo
+  database: {
+    provider: "postgresql",
+    url: process.env.POSTGRES_URL!,
+  },
+  socialProviders: {
+    cognito: {
+      clientId: process.env.COGNITO_CLIENT_ID!,
+      clientSecret: process.env.COGNITO_CLIENT_SECRET!,
+      userPoolId: process.env.COGNITO_USER_POOL_ID!,
+      region: process.env.AWS_REGION!,
+      domain: process.env.COGNITO_DOMAIN!,
+      // Esto asegura que Better Auth pida los perfiles necesarios
+      scope: ["email", "openid", "profile"],
     },
-  }),
-  // Es crítico pasar esto para evitar el error 404 y el warning de Base URL
-  baseURL: process.env.NEXT_PUBLIC_APP_URL,
-
-  emailAndPassword: {
-    enabled: true,
   },
 });
