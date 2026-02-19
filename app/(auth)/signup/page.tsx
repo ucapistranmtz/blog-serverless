@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useActionState } from "react";
+import React, { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   CognitoIdentityProviderClient,
@@ -59,11 +59,18 @@ export default function SignUpPage() {
   const [state, formAction, isPending] = useActionState(handleSignUp, {
     error: null,
     success: false,
+    email: "",
   });
 
   if (state.success) {
     router.push("/verify?email=" + encodeURIComponent(state.email || ""));
   }
+  useEffect(() => {
+    // We only redirect AFTER the component has rendered
+    if (state.success && state.email) {
+      router.push(`/verify?email=${encodeURIComponent(state.email)}`);
+    }
+  }, [state.success, state.email, router]); // These are the dependencies [cite: 2026-01-31]
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
