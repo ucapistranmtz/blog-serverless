@@ -12,8 +12,9 @@ export default function Home() {
             The <span className="text-blue-700">Serverless</span> Journey
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Exploring AWS, Terraform, and the future of web architecture. Built
-            100% on the cloud.
+            This blog is my journey to fullstack engineer, exploring Terraform,
+            AWS Cloud,Node,Dynamodb,NextJs, 100% Serverless well not for the
+            CI/CD with my Orange Pi 5 plus
           </p>
         </section>
 
@@ -34,7 +35,7 @@ export default function Home() {
               >
                 <div className="h-40 bg-gray-100 rounded-xl mb-4"></div>
                 <h3 className="text-xl font-bold mb-2">
-                  Coming soon: My AWS Migration
+                  Coming soon: My AWS Serverless Stories
                 </h3>
                 <p className="text-gray-500 text-sm mb-4">
                   How I ditched external databases for a Single Table Design in
