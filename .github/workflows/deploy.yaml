@@ -18,17 +18,37 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          # Al ser self-hosted, esto buscará en la carpeta local del runner
+          cache: "npm"
+
+      # 1. Cachear node_modules (Evita descargar 160MB cada vez)
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # 2. Cachear Next.js Build (Crucial para la eMMC)
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.next/cache
+          # Cambia la llave si cambias archivos de config o código
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
       - name: Install ALL Dependencies
+        # 'npm ci' es perfecto, pero con caché es aún más rápido
         run: npm ci
 
       - name: Security Audit
-        # This will check for known vulnerabilities
-        # Use '--audit-level=high' to only fail on serious issues
         run: npm audit --audit-level=high
 
       - name: Build NextJs
+        # Next.js usará automáticamente la caché descargada en el paso 2
         run: npm run build
 
       - name: Prune Development Dependencies

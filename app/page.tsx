@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navbar from "./components/layout/NavBar";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -14,7 +15,7 @@ export default function Home() {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             This blog is my journey to fullstack engineer, exploring Terraform,
             AWS Cloud,Node,Dynamodb,NextJs, 100% Serverless well not for the
-            CI/CD with my Orange Pi 5 plus
+            CI/CD that is runnig at my Orange Pi 5 plus
           </p>
         </section>
 
@@ -27,22 +28,36 @@ export default function Home() {
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {/* We will map our DynamoDB posts here later*/}
             {[1, 2, 3].map((post) => (
               <article
                 key={post}
-                className="border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+                className="group border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 bg-white"
               >
-                <div className="h-40 bg-gray-100 rounded-xl mb-4"></div>
-                <h3 className="text-xl font-bold mb-2">
-                  Coming soon: My AWS Serverless Stories
+                {/* Contenedor de imagen con aspect ratio fijo */}
+                <div className="relative h-48 w-full overflow-hidden rounded-xl mb-4 bg-gray-50">
+                  <Image
+                    src="/board.png" // Asegúrate de que la extensión sea .jpg como el archivo que subiste
+                    alt="Orange Pi 5 Plus Engineering Lab"
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                </div>
+
+                <h3 className="text-xl font-bold mb-2 group-hover:text-blue-700 transition-colors">
+                  Coming soon: My engineering stories
                 </h3>
-                <p className="text-gray-500 text-sm mb-4">
+
+                <p className="text-gray-500 text-sm mb-4 line-clamp-2">
                   How I ditched external databases for a Single Table Design in
                   DynamoDB...
                 </p>
-                <div className="flex items-center text-xs font-semibold text-blue-700">
-                  READ MORE →
+
+                <div className="flex items-center text-xs font-bold text-blue-700 tracking-wide">
+                  READ MORE{" "}
+                  <span className="ml-1 group-hover:translate-x-1 transition-transform">
+                    →
+                  </span>
                 </div>
               </article>
             ))}
