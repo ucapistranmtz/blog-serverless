@@ -10,8 +10,8 @@ export default function Home() {
       <Navbar />
 
       <main className="max-w-5xl mx-auto px-6 py-12">
-        <TechStack></TechStack>
         <Hero></Hero>
+        <TechStack></TechStack>
         <PostGrid></PostGrid>
       </main>
       <Footer></Footer>
