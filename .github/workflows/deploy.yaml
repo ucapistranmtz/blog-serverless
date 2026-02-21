@@ -18,10 +18,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          # Al ser self-hosted, esto buscará en la carpeta local del runner
           cache: "npm"
 
-      # 1. Cachear node_modules (Evita descargar 160MB cada vez)
       - name: Cache npm dependencies
         uses: actions/cache@v4
         with:
@@ -30,26 +28,29 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      # 2. Cachear Next.js Build (Crucial para la eMMC)
       - name: Cache Next.js build
         uses: actions/cache@v4
         with:
           path: ${{ github.workspace }}/.next/cache
-          # Cambia la llave si cambias archivos de config o código
           key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
       - name: Install ALL Dependencies
-        # 'npm ci' es perfecto, pero con caché es aún más rápido
         run: npm ci
 
       - name: Security Audit
         run: npm audit --audit-level=high
 
       - name: Build NextJs
-        # Next.js usará automáticamente la caché descargada en el paso 2
+        # The environment variables MUST be present during build for Next.js to inject them
         run: npm run build
+        env:
+          NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_COGNITO_CLIENT_ID }}
+          NEXT_PUBLIC_COGNITO_DOMAIN: ${{ secrets.NEXT_PUBLIC_COGNITO_DOMAIN }}
+          NEXT_PUBLIC_AWS_REGION: ${{ vars.NEXT_PUBLIC_AWS_REGION }}
 
       - name: Prune Development Dependencies
         run: npm prune --production
@@ -60,9 +61,10 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ vars.NEXT_PUBLIC_AWS_REGION }}
 
       - name: Deploy to S3
         if: github.event_name == 'push'
         run: |
+          # Sync the 'out' directory (static export) to the S3 bucket
           aws s3 sync out/ s3://ucapistran-blog --delete
