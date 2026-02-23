@@ -2,42 +2,33 @@
 
 import Link from "next/link";
 import { PostCard } from "../post/PostCard";
-import {
-  PostCardSchema,
-  type PostCard as PostCardType,
-} from "../../types/postCard.schema";
-import { MOCK_POSTS } from "@/app/moks/posts";
-import { useEffect, useState } from "react";
+import { type PostCard as Post } from "../../types/postCard.schema"; // Importa tu tipo
+import { usePosts } from "@/app/hooks/usePosts";
 
 export const PostGrid = () => {
-  const [posts, setPosts] = useState<PostCardType[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const [hasMore, setHasMore] = useState(true);
+  // 1. Consumimos todo directamente del hook.
+  // No necesitamos useState locales aquí.
+  const { postCards, isLoading, hasMore, error, loadMore } = usePosts(6);
 
-  const fetchPosts = async (isFirstLoad: boolean) => {
-    try {
-      setIsLoading(true);
-      const newPosts = MOCK_POSTS;
-      const validatedPosts = PostCardSchema.array().parse(newPosts);
-      setPosts((prev) =>
-        isFirstLoad ? validatedPosts : { ...prev, ...validatedPosts },
-      );
+  // 2. Estado de carga inicial (cuando no hay posts aún)
+  if (isLoading && postCards.length === 0) {
+    return <div className="text-center py-10">Loading stories from AWS...</div>;
+  }
 
-      if (newPosts.length < 6) setHasMore(false);
-      setCursor(validatedPosts[validatedPosts.length - 1].id || null);
-    } catch (error) {
-      console.log("Validation error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchPosts(true);
-  }, []);
-
-  if (isLoading)
-    return <div className="text-center py-10">Loading stories ...</div>;
+  // 3. Manejo de errores (como el 429 o fallos de Zod)
+  if (error) {
+    return (
+      <div className="text-center py-10 text-red-500 border border-red-200 rounded-lg">
+        <p>Ups! Something went wrong: {error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 text-blue-600 underline"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <section>
@@ -47,20 +38,29 @@ export const PostGrid = () => {
           View all
         </Link>
       </div>
+
+      {/* 4. Mapeamos 'postCards' que viene del hook */}
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {posts.map(({ id, title, imageUrl, excerpt, slug, date, tags }) => (
+        {postCards.map((post: Post) => (
           <PostCard
-            key={id}
-            id={id}
-            title={title}
-            excerpt={excerpt}
-            date={date}
-            slug={slug}
-            imageUrl={imageUrl}
-            tags={tags}
-          ></PostCard>
+            key={post.id}
+            {...post} // Pasamos todas las props (title, imageUrl, etc.)
+          />
         ))}
       </div>
+
+      {/* 5. Botón para cargar más (Paginación) */}
+      {hasMore && (
+        <div className="mt-12 text-center">
+          <button
+            onClick={loadMore}
+            disabled={isLoading}
+            className="px-6 py-2 bg-black text-white rounded-full hover:bg-gray-800 disabled:bg-gray-400 transition-colors"
+          >
+            {isLoading ? "Loading..." : "Load more stories"}
+          </button>
+        </div>
+      )}
     </section>
   );
 };
