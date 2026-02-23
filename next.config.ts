@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   //output: "export",
   output: "export",
-  trailingSlash: false,
+  trailingSlash: true,
   images: {
     unoptimized: true,
   },
