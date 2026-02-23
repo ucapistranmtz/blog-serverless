@@ -44,9 +44,20 @@ jobs:
         run: npm audit --audit-level=high
 
       - name: Build NextJs
-        # We force-remove the .next folder to ensure stale environment variables are purged
         run: |
-          rm -rf .next
+          # 1. Limpieza agresiva: .next y out
+          rm -rf .next out
+          
+          # 2. Debug: Verificar si la variable llega al runner (No imprimas SECRETS, solo VARS)
+          if [ -z "$NEXT_PUBLIC_API_URL" ]; then
+            echo "❌ ERROR: NEXT_PUBLIC_API_URL is EMPTY"
+            echo "Check GitHub Settings > Secrets and Variables > Actions > Variables"
+            exit 1
+          else
+            echo "✅ NEXT_PUBLIC_API_URL is set"
+          fi
+          
+          # 3. Build
           npm run build
         env:
           NEXT_PUBLIC_APP_URL: ${{ vars.NEXT_PUBLIC_APP_URL }}
