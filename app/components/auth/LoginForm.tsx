@@ -6,6 +6,8 @@ import {
   InitiateAuthCommand,
   AuthFlowType,
 } from "@aws-sdk/client-cognito-identity-provider";
+import { useAuth } from "@/app/context/AuthContext";
+import { group } from "console";
 
 // Initializing the Cognito Client
 const client = new CognitoIdentityProviderClient({
@@ -18,6 +20,7 @@ interface LoginState {
 }
 
 const LoginForm = () => {
+  const { login } = useAuth(); // Importa el hook
   const router = useRouter();
 
   /**
@@ -53,6 +56,17 @@ const LoginForm = () => {
           localStorage.setItem("idToken", IdToken || "");
           localStorage.setItem("accessToken", AccessToken || "");
           localStorage.setItem("refreshToken", RefreshToken || "");
+
+          // Crea el objeto usuario que Zod espera (según tu UserSchema)
+          const userData = {
+            id: email, // O el sub de Cognito si lo tienes
+            email: email,
+            name: "Ulises", // <--- Asegúrate de que este campo exista en tu UserSchema
+            groups: [],
+          };
+
+          // ¡ESTO ES LO QUE ACTUALIZA LA NAVBAR AL INSTANTE!
+          login(IdToken || "", userData);
         }
 
         router.push("/");
