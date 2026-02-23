@@ -45,6 +45,16 @@ const LoginForm = () => {
       // If the authentication is successful, we get the tokens
       if (response.AuthenticationResult) {
         // You can store the AccessToken/IdToken in a cookie or context here
+        const { IdToken, AccessToken, RefreshToken } =
+          response.AuthenticationResult;
+        // 1. Guardar en LocalStorage para que lo encuentres en el navegador
+        if (typeof window !== "undefined") {
+          // Usamos nombres estándar para que sea fácil encontrarlos
+          localStorage.setItem("idToken", IdToken || "");
+          localStorage.setItem("accessToken", AccessToken || "");
+          localStorage.setItem("refreshToken", RefreshToken || "");
+        }
+
         router.push("/");
         return { error: null, success: true };
       }
