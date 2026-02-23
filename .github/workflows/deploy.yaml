@@ -33,9 +33,9 @@ jobs:
         with:
           path: ${{ github.workspace }}/.next/cache
           # Increment the 'v' number in the key to manually bust the cache if needed
-          key: ${{ runner.os }}-nextjs-v2-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          key: ${{ runner.os }}-nextjs-v3-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
           restore-keys: |
-            ${{ runner.os }}-nextjs-v2-
+            ${{ runner.os }}-nextjs-v3-
 
       - name: Install ALL Dependencies
         run: npm ci
