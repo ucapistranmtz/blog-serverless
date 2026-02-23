@@ -18,7 +18,7 @@ export default function Navbar() {
         ) : isAuthenticated ? (
           <>
             <span className="text-sm text-gray-600">
-              Hola,{" "}
+              Welcome,{" "}
               <span className="font-bold text-black">
                 {user?.email?.split("@")[0]}
               </span>
