@@ -4,6 +4,7 @@ import { useAuth } from "@/app/context/AuthContext";
 
 export default function Navbar() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const isAdmin = user?.groups.includes("admins");
 
   return (
     <nav className="flex items-center justify-between p-6 bg-white border-b border-gray-100 shadow-sm">
@@ -24,13 +25,17 @@ export default function Navbar() {
               </span>
             </span>
 
+            {isAdmin ? (
+              <Link
+                href="/admin/new-post"
+                className="text-sm font-medium text-blue-700 hover:text-blue-800"
+              >
+                Make a post
+              </Link>
+            ) : (
+              ""
+            )}
             {/* Botón para ir a crear post */}
-            <Link
-              href="/admin/new-post"
-              className="text-sm font-medium text-blue-700 hover:text-blue-800"
-            >
-              Escribir
-            </Link>
 
             <button
               onClick={logout}

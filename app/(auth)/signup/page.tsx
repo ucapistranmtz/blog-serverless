@@ -62,9 +62,6 @@ export default function SignUpPage() {
     email: "",
   });
 
-  if (state.success) {
-    router.push("/verify?email=" + encodeURIComponent(state.email || ""));
-  }
   useEffect(() => {
     // We only redirect AFTER the component has rendered
     if (state.success && state.email) {
