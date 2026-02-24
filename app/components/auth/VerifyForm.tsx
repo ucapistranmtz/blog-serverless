@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useActionState } from "react";
+import React, { useActionState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   CognitoIdentityProviderClient,
@@ -57,9 +57,11 @@ const VerifyForm = () => {
   });
 
   // If confirmed, redirect to login
-  if (state.success) {
-    router.push("/login?confirmed=true");
-  }
+  useEffect(() => {
+    if (state.success) {
+      router.push("/login?confirmed=true");
+    }
+  }, [state.success, router]);
 
   return (
     <form action={formAction} className="flex flex-col w-full">

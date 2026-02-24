@@ -8,6 +8,7 @@ import {
 } from "@aws-sdk/client-cognito-identity-provider";
 import { useAuth } from "@/app/context/AuthContext";
 import { group } from "console";
+import { UserSchema } from "@/app/types/auth.schema";
 
 // Initializing the Cognito Client
 const client = new CognitoIdentityProviderClient({
@@ -44,33 +45,30 @@ const LoginForm = () => {
       });
 
       const response = await client.send(command);
+      const { AuthenticationResult } = response;
 
       // If the authentication is successful, we get the tokens
-      if (response.AuthenticationResult) {
-        // You can store the AccessToken/IdToken in a cookie or context here
-        const { IdToken, AccessToken, RefreshToken } =
-          response.AuthenticationResult;
-        // 1. Guardar en LocalStorage para que lo encuentres en el navegador
-        if (typeof window !== "undefined") {
-          // Usamos nombres estándar para que sea fácil encontrarlos
-          localStorage.setItem("idToken", IdToken || "");
-          localStorage.setItem("accessToken", AccessToken || "");
-          localStorage.setItem("refreshToken", RefreshToken || "");
+      if (AuthenticationResult) {
+        const idToken = AuthenticationResult.IdToken;
+        if (idToken) {
+          // 1. Decodificar el JWT (Payload)
+          const base64Url = idToken.split(".")[1];
+          const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+          const jsonPayload = JSON.parse(window.atob(base64));
 
-          // Crea el objeto usuario que Zod espera (según tu UserSchema)
-          const userData = {
-            id: email, // O el sub de Cognito si lo tienes
-            email: email,
-            name: "Ulises", // <--- Asegúrate de que este campo exista en tu UserSchema
-            groups: [],
-          };
+          // 2. Mapear y Validar con Zod [cite: 2026-02-23]
+          // Cognito usa "cognito:groups", nosotros en UserSchema usamos "groups"
+          const userData = UserSchema.parse({
+            email: jsonPayload.email,
+            groups: jsonPayload["cognito:groups"] || [],
+          });
 
-          // ¡ESTO ES LO QUE ACTUALIZA LA NAVBAR AL INSTANTE!
-          login(IdToken || "", userData);
+          // 3. Guardar en tu Contexto
+          login(idToken, userData);
+
+          router.push("/");
+          return { error: null, success: true };
         }
-
-        router.push("/");
-        return { error: null, success: true };
       }
 
       return { error: "Unexpected response from auth service", success: false };
