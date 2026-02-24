@@ -7,6 +7,8 @@ export const PostCardSchema = z.object({
   slug: z.string().regex(/^[a-z0-9-]+$/),
   imageUrl: z.string().default("/board.png"),
   tags: z.array(z.string()).min(1),
+  authorId: z.string().optional().default("unknown"), // Fallback para posts viejos
+  author: z.string(),
 });
 
 export type PostCard = z.infer<typeof PostCardSchema>;
