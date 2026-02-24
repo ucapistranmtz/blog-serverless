@@ -1,5 +1,5 @@
-import { PostDetail } from "@/app/components/post/PostDetail";
-
-export const Page = () => {
-  return <PostDetail />;
+const page = ({}) => {
+  return <div>Page</div>;
 };
+
+export default page;
