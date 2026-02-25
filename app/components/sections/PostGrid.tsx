@@ -42,10 +42,9 @@ export const PostGrid = () => {
       {/* 4. Mapeamos 'postCards' que viene del hook */}
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {postCards.map((post: Post) => (
-          <PostCard
-            key={post.id}
-            {...post} // Pasamos todas las props (title, imageUrl, etc.)
-          />
+          <Link key={`${post.id}${post.id}`} href={`/posts?slug=${post.slug}`}>
+            <PostCard key={post.id} {...post}></PostCard>
+          </Link>
         ))}
       </div>
 
