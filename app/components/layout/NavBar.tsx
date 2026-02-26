@@ -39,7 +39,7 @@ export default function Navbar() {
 
             <button
               onClick={logout}
-              className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
+              className="text-sm font-medium text-red-600 hover:text-red-700   transition-colors"
             >
               Log out
             </button>
