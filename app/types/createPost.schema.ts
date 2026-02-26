@@ -4,6 +4,7 @@ import { PostCardSchema } from "./postCard.schema";
 
 export const CreatePostSchema = PostCardSchema.extend({
   // El contenido es obligatorio para crear/editar
+  id: z.ulid(),
   content: z
     .string()
     .min(50, "El contenido es demasiado corto, escribe al menos 50 caracteres"),
@@ -14,8 +15,6 @@ export const CreatePostSchema = PostCardSchema.extend({
 
   // readingTime puede ser calculado en el frontend o enviado manualmente
   readingTime: z.number().min(1).optional(),
-}).omit({
-  id: true, // El ID no lo pedimos en el form, lo genera la Lambda (ULID)
 });
 
 // Este tipo lo usarás en el estado de tu componente NewPost
