@@ -61,6 +61,8 @@ const LoginForm = () => {
           const userData = UserSchema.parse({
             email: jsonPayload.email,
             groups: jsonPayload["cognito:groups"] || [],
+            id: jsonPayload.sub,
+            name: jsonPayload.name,
           });
 
           // 3. Guardar en tu Contexto

@@ -3,6 +3,8 @@ import { z } from "zod";
 // 1. User Schema (Single Source of Truth for Data)
 export const UserSchema = z.object({
   email: z.email(),
+  id: z.string(),
+  name: z.string(),
   groups: z.array(z.string()).default([]),
 });
 

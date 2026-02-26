@@ -4,14 +4,20 @@ import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 import RichTextEditor from "@/app/components/post/editor/richTextEditor";
-import { CreatePostSchema } from "@/app/types/createPost.schema";
+import {
+  CreatePostInput,
+  CreatePostSchema,
+} from "@/app/types/createPost.schema";
 import { calculateReadingTime } from "@/app/utils/readingTime";
+import { useCreatePost } from "@/app/hooks/useCreatePost";
 import { ZodError } from "zod";
+import { ulid } from "ulid";
 
 export default function NewPostForm() {
   const { user } = useAuth();
   const isAdmin = user?.groups.includes("admins");
   const router = useRouter();
+  const { createPost, isUploading, error: apiError, success } = useCreatePost();
 
   // Ref para saber si el usuario editó el excerpt manualmente
   const isExcerptDirty = useRef(false);
@@ -64,20 +70,24 @@ export default function NewPostForm() {
     try {
       // Calculamos el tiempo de lectura justo antes de validar
       const readingTime = calculateReadingTime(formData.content);
-
-      const payload = {
+      const id = ulid();
+      const payload: CreatePostInput = {
         ...formData,
         readingTime,
-        date: new Date().toISOString(), // Zod 4 espera formato ISO
+        date: new Date().toISOString(),
+        imageUrl: "/board.png",
+        tags: ["AWS"],
+        authorId: user!.id,
+        author: user!.name,
+        id,
       };
 
-      // Validamos con Zod
-      const validated = CreatePostSchema.parse(payload);
-
-      console.log("Payload listo para la Lambda:", validated);
-
       // const res = await fetch('/api/posts', { method: 'POST', body: JSON.stringify(validated) });
-      alert("Post validado correctamente. Listo para subir a AWS!");
+      const result = await createPost(payload as any);
+      if (result) {
+        alert("🚀 Post published successfully!");
+        router.push("/"); // O a la lista de posts
+      }
     } catch (err: any) {
       if (err instanceof ZodError) {
         const messages = err.issues
@@ -97,7 +107,12 @@ export default function NewPostForm() {
       <h1 className="text-3xl font-extrabold mb-8 text-gray-900">
         Create New Post
       </h1>
-
+      {/* Mostrar error de la API si existe */}
+      {apiError && (
+        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm">
+          <strong>Error:</strong> {apiError}
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-6 mb-8">
         {/* Title */}
         <div>
@@ -156,10 +171,27 @@ export default function NewPostForm() {
 
       <button
         onClick={handleSubmit}
-        className="mt-8 w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-red-700 active:scale-[0.98] transition-all shadow-lg"
+        disabled={isUploading}
+        className={`mt-8 w-full font-bold py-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2
+          ${
+            isUploading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]"
+          }`}
       >
-        🚀 Publish Post
+        {isUploading ? (
+          <>
+            <span className="animate-spin text-xl">🌀</span> Publishing...
+          </>
+        ) : (
+          "🚀 Publish Post"
+        )}
       </button>
+      {success && (
+        <p className="mt-4 text-center text-green-600 font-medium italic">
+          Redirecting to home...
+        </p>
+      )}
     </div>
   );
 }
