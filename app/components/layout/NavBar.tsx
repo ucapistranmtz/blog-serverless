@@ -27,7 +27,7 @@ export default function Navbar() {
 
             {isAdmin ? (
               <Link
-                href="/admin/new-post"
+                href="/admin/dashboard/posts/new"
                 className="text-sm font-medium text-blue-700 hover:text-blue-800"
               >
                 Make a post

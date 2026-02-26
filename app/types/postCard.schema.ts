@@ -8,7 +8,7 @@ export const PostCardSchema = z.object({
   imageUrl: z.string().default("/board.png"),
   tags: z.array(z.string()).min(1),
   authorId: z.string().optional().default("unknown"), // Fallback para posts viejos
-  author: z.string().default(`${process.env.NEXT_PUBLIC_AUTHOR_NAME}`),
+  author: z.string().default("unknown"),
 });
 
 export type PostCard = z.infer<typeof PostCardSchema>;
