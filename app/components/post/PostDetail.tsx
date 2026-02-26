@@ -31,7 +31,7 @@ export default function PostDetail({
           {title}
         </h1>
 
-        <div className="relative w-full h-[400px] rounded-2xl overflow-hidden shadow-xl mb-10">
+        <div className="relative w-full h-100 rounded-2xl overflow-hidden shadow-xl mb-10">
           <Image
             src={imageUrl}
             alt={title}
