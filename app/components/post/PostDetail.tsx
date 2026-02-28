@@ -30,18 +30,6 @@ export default function PostDetail({
         <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 leading-tight">
           {title}
         </h1>
-
-        {/*
-        <div className="relative w-full h-100 rounded-2xl overflow-hidden shadow-xl mb-10">
-          <Image
-            src={imageUrl}
-            alt={title}
-            fill
-            className="object-cover"
-            priority
-          />
-        </div>
-        */}
       </header>
 
       {/* Contenido Enriquecido de Tiptap */}

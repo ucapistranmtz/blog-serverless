@@ -3,9 +3,10 @@ export const uploadImageToS3 = async (
   token: string,
 ): Promise<string> => {
   try {
-    const url = process.env.NEXT_PUBLIC_API_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-    const response = await fetch(`${url}/files/presigned`, {
+    // 1. Obtener la URL prefirmada desde tu Lambda
+    const response = await fetch(`${apiUrl}/files/presigned`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -17,10 +18,11 @@ export const uploadImageToS3 = async (
       }),
     });
 
-    if (!response.ok) throw new Error("Error al obtener la URL prefirmada");
+    if (!response.ok) throw new Error("Failed to get presigned URL");
 
     const { uploadUrl, fileKey } = await response.json();
 
+    // 2. Subida directa a S3 (Esto no pasa por CloudFront, va directo al Bucket)
     const upload = await fetch(uploadUrl, {
       method: "PUT",
       body: file,
@@ -29,16 +31,17 @@ export const uploadImageToS3 = async (
       },
     });
 
-    if (!upload.ok) throw new Error("Error al subir el archivo a S3");
+    if (!upload.ok) throw new Error("Failed to upload file to S3");
 
-    const bucketName = process.env.NEXT_PUBLIC_MEDIA_BUCKET;
-    const awsRegion = process.env.NEXT_PUBLIC_AWS_REGION;
+    // 3. Construir la URL de CloudFront para el frontend
+    // Quitamos cualquier slash al final de la variable de entorno por seguridad
+    const mediaUrl = process.env.NEXT_PUBLIC_MEDIA_URL?.replace(/\/$/, "");
 
-    const publicUrl = `https://${bucketName}.s3.${awsRegion}.amazonaws.com/${fileKey}`;
-
-    https: return publicUrl;
+    // Retornamos la URL que Lighthouse amará (con caché y seguridad)
+    return `${mediaUrl}/${fileKey}`;
   } catch (error) {
-    console.error("Error en uploadImageToS3:", error);
+    // Recuerda que en tus instrucciones pediste comentarios en inglés
+    console.error("Error in uploadImageToS3:", error);
     throw error;
   }
 };
