@@ -14,7 +14,7 @@ import { ZodError } from "zod";
 import { ulid } from "ulid";
 
 export default function NewPostForm() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const isAdmin = user?.groups.includes("admins");
   const router = useRouter();
   const { createPost, isUploading, error: apiError, success } = useCreatePost();
@@ -166,6 +166,7 @@ export default function NewPostForm() {
         <RichTextEditor
           content={formData.content}
           onChange={handleEditorUpdate}
+          authToken={token ? token : ""}
         />
       </div>
 

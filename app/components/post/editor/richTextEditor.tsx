@@ -25,11 +25,13 @@ import { MenuBar } from "./menuBar";
 
 interface RichTextEditorProps {
   content: string;
+  authToken: string;
   onChange: (html: string) => void;
 }
 
 export default function RichTextEditor({
   content,
+  authToken,
   onChange,
 }: RichTextEditorProps) {
   const editor = useEditor({
@@ -75,7 +77,7 @@ export default function RichTextEditor({
 
   return (
     <div className="max-w-4xl mx-auto border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
-      <MenuBar editor={editor} />
+      <MenuBar editor={editor} authToken={authToken} />
       <div className="bg-white overflow-x-auto">
         <EditorContent editor={editor} />
       </div>

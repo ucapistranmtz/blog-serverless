@@ -24,7 +24,13 @@ import {
 
 import { uploadImageToS3 } from "../../../utils/uploadImage";
 
-export const MenuBar = ({ editor }: { editor: any }) => {
+export const MenuBar = ({
+  editor,
+  authToken,
+}: {
+  editor: any;
+  authToken: string;
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   if (!editor) return null;
 
@@ -63,7 +69,7 @@ export const MenuBar = ({ editor }: { editor: any }) => {
         onChange={async (e) => {
           const file = e.target.files?.[0];
           if (file) {
-            const url = await uploadImageToS3(file);
+            const url = await uploadImageToS3(file, authToken);
             editor.chain().focus().setImage({ src: url }).run();
           }
         }}
