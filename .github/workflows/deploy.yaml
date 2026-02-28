@@ -67,6 +67,7 @@ jobs:
           NEXT_PUBLIC_COGNITO_DOMAIN: ${{ secrets.NEXT_PUBLIC_COGNITO_DOMAIN }}
           NEXT_PUBLIC_AWS_REGION: ${{ vars.NEXT_PUBLIC_AWS_REGION }}
           NEXT_PUBLIC_AUTHOR_NAME: ${{ vars.NEXT_PUBLIC_AUTHOR_NAME }}
+          NEXT_PUBLIC_MEDIA_BUCKET: ${{vars.NEXT_PUBLIC_MEDIA_BUCKET}}
 
       - name: Prune Development Dependencies
         run: npm prune --production
