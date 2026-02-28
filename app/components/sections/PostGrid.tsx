@@ -4,14 +4,49 @@ import Link from "next/link";
 import { PostCard } from "../post/PostCard";
 import { type PostCard as Post } from "../../types/postCard.schema"; // Importa tu tipo
 import { usePosts } from "@/app/hooks/usePosts";
+import { useEffect, useMemo, useState } from "react";
+
+const CACHE_KEY = "posts_grid_cache";
 
 export const PostGrid = () => {
+  const {
+    postCards: remotePosts,
+    isLoading,
+    hasMore,
+    error,
+    loadMore,
+  } = usePosts(6);
+  const [cachedPosts, setCachedPosts] = useState<Post[]>([]);
+  const [isRestored, setIsRestored] = useState(false);
+
+  //get cache
+  useEffect(() => {
+    const saved = localStorage.getItem(CACHE_KEY);
+    if (saved) {
+      try {
+        setCachedPosts(JSON.parse(saved));
+      } catch (e) {
+        console.error("Error restoring posts cache", e);
+      }
+    }
+    setIsRestored(true);
+  }, []);
+
+  useEffect(() => {
+    if (remotePosts.length > 0) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(remotePosts));
+    }
+  }, [remotePosts]);
+
+  const displayPosts = useMemo(() => {
+    return remotePosts.length > 0 ? remotePosts : cachedPosts;
+  }, [remotePosts, cachedPosts]);
+
   // 1. Consumimos todo directamente del hook.
   // No necesitamos useState locales aquí.
-  const { postCards, isLoading, hasMore, error, loadMore } = usePosts(6);
 
   // 2. Estado de carga inicial (cuando no hay posts aún)
-  if (isLoading && postCards.length === 0) {
+  if (isLoading && displayPosts.length === 0) {
     return <div className="text-center py-10">Loading stories from AWS...</div>;
   }
 
@@ -41,8 +76,11 @@ export const PostGrid = () => {
 
       {/* 4. Mapeamos 'postCards' que viene del hook */}
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-        {postCards.map((post: Post) => (
-          <Link key={`${post.id}${post.id}`} href={`/posts?slug=${post.slug}`}>
+        {displayPosts.map((post: Post) => (
+          <Link
+            key={`${post.id}${post.slug}`}
+            href={`/posts?slug=${post.slug}`}
+          >
             <PostCard key={post.id} {...post}></PostCard>
           </Link>
         ))}

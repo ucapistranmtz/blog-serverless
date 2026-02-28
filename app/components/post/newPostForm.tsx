@@ -14,15 +14,16 @@ import { useCreatePost } from "@/app/hooks/useCreatePost";
 import { ZodError } from "zod";
 import { ulid } from "ulid";
 
+const CACHE_KEY = "blog_post_draft";
+
 export default function NewPostForm() {
   const { user, token } = useAuth();
   const isAdmin = user?.groups.includes("admins");
   const router = useRouter();
   const { createPost, isUploading, error: apiError, success } = useCreatePost();
-
-  // Ref para saber si el usuario editó el excerpt manualmente
   const isExcerptDirty = useRef(false);
   const isSlugDirty = useRef(false);
+  const [isRestored, setIsRestored] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -32,23 +33,47 @@ export default function NewPostForm() {
     tags: ["general"],
   });
 
-  // 1. Efecto para generar el SLUG automáticamente a partir del Título
   useEffect(() => {
     if (!isSlugDirty.current && formData.title) {
       const generatedSlug = formData.title
         .toLowerCase()
         .trim()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "") // Quitar acentos
-        .replace(/[^a-z0-9 -]/g, "") // Quitar caracteres raros
-        .replace(/\s+/g, "-") // Espacios por guiones
-        .replace(/-+/g, "-"); // Evitar guiones dobles
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9 -]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
 
       setFormData((prev) => ({ ...prev, slug: generatedSlug }));
     }
   }, [formData.title]);
 
-  // 2. Lógica para el Excerpt desde el Editor
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(CACHE_KEY);
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        setFormData(parsed);
+        if (parsed.excerpt) isExcerptDirty.current = true;
+        if (parsed.slug) isSlugDirty.current = true;
+        console.log("Draft restored from cache 📦");
+      } catch (e) {
+        console.error("Failed to parse draft", e);
+      }
+    }
+    setIsRestored(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isRestored) return; // <--- NO guardes nada si no hemos terminado de cargar el borrador anterior
+
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(formData));
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [formData, isRestored]);
+
   const handleEditorUpdate = (html: string) => {
     setFormData((prev) => {
       const newData = { ...prev, content: html };
@@ -78,7 +103,7 @@ export default function NewPostForm() {
         id,
         readingTime,
         date: new Date().toISOString(),
-        imageUrl: firstImage || "/board.png", // Aseguramos un string válido
+        imageUrl: firstImage || "/board.png",
         authorId: user?.id ?? "",
         author: user?.name ?? "Unknown",
       };
@@ -86,6 +111,7 @@ export default function NewPostForm() {
 
       const result = await createPost(validatedPayload);
       if (result) {
+        localStorage.removeItem(CACHE_KEY);
         alert("🚀 Post published successfully!");
         router.push("/");
       }
