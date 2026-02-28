@@ -68,6 +68,9 @@ jobs:
           NEXT_PUBLIC_AWS_REGION: ${{ vars.NEXT_PUBLIC_AWS_REGION }}
           NEXT_PUBLIC_AUTHOR_NAME: ${{ vars.NEXT_PUBLIC_AUTHOR_NAME }}
           NEXT_PUBLIC_MEDIA_BUCKET: ${{vars.NEXT_PUBLIC_MEDIA_BUCKET}}
+          NEXT_PUBLIC_BLOG_TITLE: ${{vars.NEXT_PUBLIC_BLOG_TITLE}}
+          NEXT_PUBLIC_BLOG_DESC: ${{vars.NEXT_PUBLIC_BLOG_DESC}}
+          NEXT_PUBLIC_SITE_URL: ${{vars.NEXT_PUBLIC_SITE_URL}}
 
       - name: Prune Development Dependencies
         run: npm prune --production
@@ -83,5 +86,8 @@ jobs:
       - name: Deploy to S3
         if: github.event_name == 'push'
         run: |
-          # Sync the 'out' directory (static export) to the S3 bucket
-          aws s3 sync out/ s3://ucapistran-blog --delete
+          # 1. Subir archivos estáticos (JS, CSS, Imágenes) con caché larga
+          aws s3 sync out/_next/ s3://ucapistran-blog/_next/ --delete --cache-control "max-age=31536000, public"
+          
+          # 2. Subir el resto (HTML) con caché corta para que los cambios se vean rápido
+          aws s3 sync out/ s3://ucapistran-blog/ --delete --exclude "_next/*" --cache-control "max-age=0, no-cache, no-store, must-revalidate"
