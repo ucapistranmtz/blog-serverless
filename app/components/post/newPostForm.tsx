@@ -9,6 +9,7 @@ import {
   CreatePostSchema,
 } from "@/app/types/createPost.schema";
 import { calculateReadingTime } from "@/app/utils/readingTime";
+import { extractFirstImageUrl } from "@/app/utils/extractImageUrl";
 import { useCreatePost } from "@/app/hooks/useCreatePost";
 import { ZodError } from "zod";
 import { ulid } from "ulid";
@@ -68,25 +69,25 @@ export default function NewPostForm() {
 
   const handleSubmit = async () => {
     try {
-      // Calculamos el tiempo de lectura justo antes de validar
       const readingTime = calculateReadingTime(formData.content);
       const id = ulid();
-      const payload: CreatePostInput = {
+
+      const firstImage = extractFirstImageUrl(formData.content);
+      const rawPayload = {
         ...formData,
+        id,
         readingTime,
         date: new Date().toISOString(),
-        imageUrl: "/board.png",
-        tags: ["AWS"],
-        authorId: user!.id,
-        author: user!.name,
-        id,
+        imageUrl: firstImage || "/board.png", // Aseguramos un string válido
+        authorId: user?.id ?? "",
+        author: user?.name ?? "Unknown",
       };
+      const validatedPayload = CreatePostSchema.parse(rawPayload);
 
-      // const res = await fetch('/api/posts', { method: 'POST', body: JSON.stringify(validated) });
-      const result = await createPost(payload as any);
+      const result = await createPost(validatedPayload);
       if (result) {
         alert("🚀 Post published successfully!");
-        router.push("/"); // O a la lista de posts
+        router.push("/");
       }
     } catch (err: any) {
       if (err instanceof ZodError) {
@@ -107,14 +108,12 @@ export default function NewPostForm() {
       <h1 className="text-3xl font-extrabold mb-8 text-gray-900">
         Create New Post
       </h1>
-      {/* Mostrar error de la API si existe */}
       {apiError && (
         <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm">
           <strong>Error:</strong> {apiError}
         </div>
       )}
       <div className="grid grid-cols-1 gap-6 mb-8">
-        {/* Title */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">
             Title
