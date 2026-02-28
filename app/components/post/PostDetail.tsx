@@ -31,6 +31,7 @@ export default function PostDetail({
           {title}
         </h1>
 
+        {/*
         <div className="relative w-full h-100 rounded-2xl overflow-hidden shadow-xl mb-10">
           <Image
             src={imageUrl}
@@ -40,6 +41,7 @@ export default function PostDetail({
             priority
           />
         </div>
+        */}
       </header>
 
       {/* Contenido Enriquecido de Tiptap */}
