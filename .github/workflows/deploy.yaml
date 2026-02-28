@@ -91,3 +91,11 @@ jobs:
           
           # 2. Subir el resto (HTML) con caché corta para que los cambios se vean rápido
           aws s3 sync out/ s3://ucapistran-blog/ --delete --exclude "_next/*" --cache-control "max-age=0, no-cache, no-store, must-revalidate"
+      - name: Invalidate CloudFront Cache
+        if: github.event_name == 'push'
+        run: |
+          # Use the Distribution ID from your Terraform output
+          # You should save this ID in your GitHub Repository Secrets
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
