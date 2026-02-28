@@ -54,7 +54,18 @@ const LoginForm = () => {
           // 1. Decodificar el JWT (Payload)
           const base64Url = idToken.split(".")[1];
           const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-          const jsonPayload = JSON.parse(window.atob(base64));
+
+          const jsonPayload = JSON.parse(
+            decodeURIComponent(
+              window
+                .atob(base64)
+                .split("")
+                .map(
+                  (c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2),
+                )
+                .join(""),
+            ),
+          );
 
           // 2. Mapear y Validar con Zod [cite: 2026-02-23]
           // Cognito usa "cognito:groups", nosotros en UserSchema usamos "groups"
