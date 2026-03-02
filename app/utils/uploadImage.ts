@@ -28,6 +28,7 @@ export const uploadImageToS3 = async (
       body: file,
       headers: {
         "Content-Type": file.type,
+        "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
 
