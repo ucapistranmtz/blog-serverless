@@ -2,19 +2,20 @@
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/layout/NavBar";
 import { Footer } from "./components/sections/Footer";
-import "./globals.css"; // Asegúrate de importar tus estilos aquí
+import "./globals.css";
 import type { Metadata } from "next";
 
 const DEFAULT_TITLE = "dev-record | Fullstack Engineering & Cloud Journey";
 const DEFAULT_DESC =
   "A digital log of fullstack projects, AWS serverless architecture, and continuous learning by Ulises Capistrán.";
+// Use the CloudFront URL or your custom domain
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://your-s3-bucket-url.com";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://d3ij1xil9no95.cloudfront.net";
 
 export const metadata: Metadata = {
   title: {
     default: process.env.NEXT_PUBLIC_BLOG_TITLE || DEFAULT_TITLE,
-    template: "%s | dev-record", // Esto permite que los posts digan: "Mi Post | dev-record"
+    template: "%s | dev-record", // This allows posts to show as: "My Post Title | dev-record"
   },
   description: process.env.NEXT_PUBLIC_BLOG_DESC || DEFAULT_DESC,
   keywords: [
@@ -29,7 +30,12 @@ export const metadata: Metadata = {
   authors: [{ name: "Ulises Capistrán" }],
   metadataBase: new URL(SITE_URL),
 
-  // Open Graph (Para que se vea increíble en LinkedIn/Discord)
+  // Canonical configuration to prevent duplicate content issues
+  alternates: {
+    canonical: "/",
+  },
+
+  // Open Graph configuration for social media sharing
   openGraph: {
     title: process.env.NEXT_PUBLIC_BLOG_TITLE || DEFAULT_TITLE,
     description: process.env.NEXT_PUBLIC_BLOG_DESC || DEFAULT_DESC,
@@ -39,12 +45,12 @@ export const metadata: Metadata = {
     locale: "en_US",
   },
 
-  // Twitter Card
+  // Twitter Card configuration
   twitter: {
     card: "summary_large_image",
     title: process.env.NEXT_PUBLIC_BLOG_TITLE || DEFAULT_TITLE,
     description: process.env.NEXT_PUBLIC_BLOG_DESC || DEFAULT_DESC,
-    creator: "@CapistranUlises", // Opcional
+    creator: "@CapistranUlises",
   },
 };
 
@@ -55,13 +61,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <meta charSet="utf-8" />
+      {/* Charset is handled automatically by Next.js metadata, but keep it if you prefer */}
       <body className="min-h-screen bg-white text-black">
         <AuthProvider>
-          {/* El Navbar ahora es global y puede usar useAuth() */}
+          {/* Global Navbar with access to AuthContext */}
           <Navbar />
 
-          {/* Aquí se inyectan page.tsx, login/page.tsx, etc. */}
+          {/* Main content injection (pages, posts, etc.) */}
           {children}
 
           <Footer />

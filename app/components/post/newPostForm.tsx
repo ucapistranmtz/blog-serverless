@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
-import RichTextEditor from "@/app/components/post/editor/richTextEditor";
 import {
   CreatePostInput,
   CreatePostSchema,
@@ -13,8 +12,22 @@ import { extractFirstImageUrl } from "@/app/utils/extractImageUrl";
 import { useCreatePost } from "@/app/hooks/useCreatePost";
 import { ZodError } from "zod";
 import { ulid } from "ulid";
+import dynamic from "next/dynamic";
 
 const CACHE_KEY = "blog_post_draft";
+const RichTextEditor = dynamic(
+  () => import("@/app/components/post/editor/richTextEditor"),
+  {
+    ssr: false, // El editor necesita el objeto 'window', por eso desactivamos SSR
+    loading: () => (
+      <div className="h-[500px] flex items-center justify-center bg-gray-50 text-gray-400">
+        <span className="animate-pulse italic">
+          Cargando el editor profesional...
+        </span>
+      </div>
+    ),
+  },
+);
 
 export default function NewPostForm() {
   const { user, token } = useAuth();
