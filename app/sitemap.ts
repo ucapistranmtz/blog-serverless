@@ -1,45 +1,44 @@
+// app/sitemap.ts
 import { MetadataRoute } from "next";
 
-// Este es el tipo de respuesta que espera Next.js
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://tu-blog.com";
+// This is required for 'output: export' to work with dynamic routes
+export const dynamic = "force-static";
 
-  // 1. Obtener los posts de tu API/AWS
-  // Usamos el mismo endpoint que usas en usePosts
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Use environment variable for the base URL
+  const baseUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://d3ij1xil9no95.cloudfront.net";
+
   let posts = [];
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts`, {
-      next: { revalidate: 3600 }, // Cache por 1 hora
-    });
+    // Fetch posts during build time
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/posts`);
+
+    if (!response.ok) throw new Error("Failed to fetch posts");
+
     const data = await response.json();
     posts = data.postCards || [];
   } catch (error) {
-    console.error("Error generating sitemap:", error);
+    console.error("Sitemap build error:", error);
+    // Return empty array or just static pages on error to not break the build
   }
 
-  // 2. Mapear los posts a objetos de sitemap
+  // Map your posts to sitemap entries
   const postEntries = posts.map((post: any) => ({
     url: `${baseUrl}/posts?slug=${post.slug}`,
-    lastModified: new Date(post.createdAt || new Date()),
+    lastModified: new Date(post.date || new Date()),
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
 
-  // 3. Páginas estáticas principales
-  const staticPages = [
+  // Return the full list of URLs
+  return [
     {
       url: baseUrl,
       lastModified: new Date(),
       changeFrequency: "daily" as const,
       priority: 1.0,
     },
-    {
-      url: `${baseUrl}/posts`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    },
+    ...postEntries,
   ];
-
-  return [...staticPages, ...postEntries];
 }
