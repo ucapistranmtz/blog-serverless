@@ -37,7 +37,6 @@ export const uploadImageToS3 = async (
     // 3. Construir la URL de CloudFront para el frontend
     // Quitamos cualquier slash al final de la variable de entorno por seguridad
     const mediaUrl = process.env.NEXT_PUBLIC_MEDIA_URL?.replace(/\/$/, "");
-
     // Retornamos la URL que Lighthouse amará (con caché y seguridad)
     return `${mediaUrl}/${fileKey}`;
   } catch (error) {

@@ -5,6 +5,7 @@ import { PostCard } from "../post/PostCard";
 import { type PostCard as Post } from "../../types/postCard.schema"; // Importa tu tipo
 import { usePosts } from "@/app/hooks/usePosts";
 import { useEffect, useMemo, useState } from "react";
+import { getOptimizedThumbnail } from "@/app/utils/getOptimizedThumbnail";
 
 const CACHE_KEY = "posts_grid_cache";
 
@@ -39,7 +40,11 @@ export const PostGrid = () => {
   }, [remotePosts]);
 
   const displayPosts = useMemo(() => {
-    return remotePosts.length > 0 ? remotePosts : cachedPosts;
+    const posts = remotePosts.length > 0 ? remotePosts : cachedPosts;
+    return posts.map((post) => ({
+      ...post,
+      imageUrl: getOptimizedThumbnail(post.imageUrl),
+    }));
   }, [remotePosts, cachedPosts]);
 
   // 1. Consumimos todo directamente del hook.

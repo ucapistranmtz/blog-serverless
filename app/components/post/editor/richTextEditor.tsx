@@ -29,6 +29,56 @@ interface RichTextEditorProps {
   onChange: (html: string) => void;
 }
 
+const OptimizedImage = Image.extend({
+  renderHTML({ HTMLAttributes }) {
+    const src = HTMLAttributes.src;
+
+    // 1. Check if it's our S3/CloudFront image
+    if (src && src.includes("/uploads/")) {
+      // 2. Transform URL: uploads -> optimized AND remove extension
+      // Example: .../uploads/my-photo.png -> .../optimized/my-photo
+      const baseUrl = src
+        .replace("/uploads/", "/optimized/")
+        .replace(/\.(jpg|jpeg|png|webp|gif)$/i, ""); // Remove any extension
+
+      // 3. Construct the responsive <picture> tag
+      return [
+        "picture",
+        { class: "block my-6" },
+        [
+          "source",
+          {
+            srcset: `${baseUrl}-lg.webp`,
+            media: "(min-width: 1024px)",
+            type: "image/webp",
+          },
+        ],
+        [
+          "source",
+          {
+            srcset: `${baseUrl}-md.webp`,
+            media: "(min-width: 640px)",
+            type: "image/webp",
+          },
+        ],
+        [
+          "img",
+          {
+            ...HTMLAttributes,
+            src: `${baseUrl}-lg.webp`, // <--- CAMBIO: Guardamos la LG como principal
+            loading: "lazy",
+            class:
+              "rounded-lg shadow-md max-w-full mx-auto block border border-gray-100",
+            onerror: `this.onerror=null; this.src='${src}';`,
+          },
+        ],
+      ];
+    }
+
+    return ["img", HTMLAttributes];
+  },
+});
+
 export default function RichTextEditor({
   content,
   authToken,
@@ -50,11 +100,8 @@ export default function RichTextEditor({
       TableCell,
       Youtube.configure({ width: 640, height: 480 }),
       Twitch,
-      Image.configure({
-        HTMLAttributes: {
-          class:
-            "rounded-lg shadow-md max-w-full mx-auto block my-6 border border-gray-100",
-        },
+      OptimizedImage.configure({
+        allowBase64: true,
       }),
       Link.configure({
         openOnClick: false,

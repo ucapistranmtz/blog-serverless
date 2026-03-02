@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 import { uploadImageToS3 } from "../../../utils/uploadImage";
-
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const MenuBar = ({
   editor,
   authToken,
@@ -69,8 +69,11 @@ export const MenuBar = ({
         onChange={async (e) => {
           const file = e.target.files?.[0];
           if (file) {
+            document.body.style.cursor = "wait";
             const url = await uploadImageToS3(file, authToken);
+            await sleep(2500);
             editor.chain().focus().setImage({ src: url }).run();
+            document.body.style.cursor = "default";
           }
         }}
       />

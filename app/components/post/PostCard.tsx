@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { type PostCard as PostCardType } from "../../types/postCard.schema";
+import { getOptimizedThumbnail } from "@/app/utils/getOptimizedThumbnail";
 
 export const PostCard = (post: PostCardType) => {
   return (
